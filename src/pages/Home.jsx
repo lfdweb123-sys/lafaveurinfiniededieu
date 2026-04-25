@@ -1,168 +1,282 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  ArrowRight, Globe, Code2, Smartphone, Shield, CheckCircle, 
-  Zap, ChevronRight, ArrowUp, Menu, X, Sparkles,
-  Server, Cloud, Database, Palette, BarChart3, Users
+import {
+  ArrowRight, Globe, Code2, Smartphone, Shield, CheckCircle,
+  Zap, ArrowUp, Menu, X, Sparkles,
+  Cloud, Database, Palette, BarChart3
 } from 'lucide-react';
 
+/* ─── Word slider ──────────────────────────────────────────── */
 const SLIDE_WORDS = [
-  { word: 'l\'Afrique', color: '#D4A017' },
-  { word: 'le Bénin', color: '#008751' },
-  { word: 'le monde', color: '#E8112D' },
-  { word: 'l\'Europe', color: '#0057FF' },
+  { word: "l'Afrique",  color: '#C8931A' },
+  { word: 'le Bénin',   color: '#008751' },
+  { word: 'le monde',   color: '#C8931A' },
+  { word: "l'Europe",   color: '#0057FF' },
 ];
 
 function WordSlider() {
   const [index, setIndex] = useState(0);
-  const [out, setOut] = useState(false);
+  const [out,   setOut]   = useState(false);
   useEffect(() => {
     const t = setInterval(() => {
       setOut(true);
-      setTimeout(() => { setIndex(i => (i + 1) % SLIDE_WORDS.length); setOut(false); }, 320);
-    }, 2400);
+      setTimeout(() => { setIndex(i => (i + 1) % SLIDE_WORDS.length); setOut(false); }, 300);
+    }, 2600);
     return () => clearInterval(t);
   }, []);
   const { word, color } = SLIDE_WORDS[index];
   return (
-    <span style={{ color, display: 'inline-block', transition: 'opacity .28s ease, transform .28s ease', opacity: out ? 0 : 1, transform: out ? 'translateY(14px)' : 'translateY(0)' }}>
+    <span style={{
+      color,
+      display: 'inline-block',
+      transition: 'opacity .25s ease, transform .25s ease',
+      opacity: out ? 0 : 1,
+      transform: out ? 'translateY(10px)' : 'translateY(0)',
+    }}>
       {word}
     </span>
   );
 }
 
+/* ─── Data ─────────────────────────────────────────────────── */
 const PRODUCTS = [
-  { name: 'Passerelle de Paiement', desc: '15 providers, 40+ pays, Mobile Money, cartes, PayPal. API REST complète.', icon: Globe, link: 'https://payment-gateway-iota-bay.vercel.app', color: '#D4A017', bg: 'from-amber-50 to-yellow-50' },
-  { name: 'Facture App', desc: 'Factures, contrats, paiements en ligne. Assistant IA intégré pour freelances et PME.', icon: Shield, link: 'https://facture-app-sigma.vercel.app', color: '#2563EB', bg: 'from-blue-50 to-indigo-50' },
-  { name: 'Prochain Produit', desc: 'Une nouvelle solution innovante en cours de développement. Restez connecté.', icon: Sparkles, link: '#', color: '#7C3AED', bg: 'from-purple-50 to-violet-50', coming: true }
+  {
+    name: 'Passerelle de Paiement',
+    desc: '15 providers, 40+ pays, Mobile Money, cartes, PayPal. API REST complète.',
+    icon: Globe,
+    link: 'https://payment-gateway-iota-bay.vercel.app',
+    accent: '#C8931A',
+    tag: 'En ligne',
+  },
+  {
+    name: 'Facture App',
+    desc: 'Factures, contrats, paiements en ligne. Assistant IA intégré pour freelances et PME.',
+    icon: Shield,
+    link: 'https://facture-app-sigma.vercel.app',
+    accent: '#2563EB',
+    tag: 'En ligne',
+  },
+  {
+    name: 'Prochain Produit',
+    desc: 'Une nouvelle solution innovante en cours de développement. Restez connecté.',
+    icon: Sparkles,
+    link: '#',
+    accent: '#7C3AED',
+    tag: 'Bientôt',
+    coming: true,
+  },
 ];
 
 const SERVICES = [
-  { icon: Code2, title: 'Développement Web', desc: 'Sites vitrines, applications web, plateformes SaaS sur mesure.' },
-  { icon: Smartphone, title: 'Applications Mobiles', desc: 'iOS, Android, cross-platform. Solutions mobiles performantes.' },
-  { icon: Cloud, title: 'Solutions Cloud', desc: 'Hébergement, déploiement, scalabilité. Infrastructure robuste.' },
-  { icon: Database, title: 'APIs & Backend', desc: 'Conception d\'APIs REST, microservices, architectures backend.' },
-  { icon: Palette, title: 'Design UI/UX', desc: 'Interfaces modernes, expérience utilisateur optimale, design pro.' },
-  { icon: BarChart3, title: 'Conseil Technique', desc: 'Audit, architecture, accompagnement technique personnalisé.' }
+  { icon: Code2,      title: 'Développement Web',    desc: 'Sites vitrines, applications web, plateformes SaaS sur mesure.' },
+  { icon: Smartphone, title: 'Applications Mobiles',  desc: 'iOS, Android, cross-platform. Solutions mobiles performantes.' },
+  { icon: Cloud,      title: 'Solutions Cloud',       desc: 'Hébergement, déploiement, scalabilité. Infrastructure robuste.' },
+  { icon: Database,   title: 'APIs & Backend',        desc: "Conception d'APIs REST, microservices, architectures backend." },
+  { icon: Palette,    title: 'Design UI/UX',          desc: 'Interfaces modernes, expérience utilisateur optimale, design pro.' },
+  { icon: BarChart3,  title: 'Conseil Technique',     desc: 'Audit, architecture, accompagnement technique personnalisé.' },
 ];
 
-const TECH_STACK = [
-  'React', 'Vue.js', 'Node.js', 'Firebase', 'Vercel', 'TailwindCSS',
-  'Python', 'Flutter', 'MongoDB', 'PostgreSQL', 'AWS', 'Stripe'
-];
+const TECH = ['React','Vue.js','Node.js','Firebase','Vercel','TailwindCSS','Python','Flutter','MongoDB','PostgreSQL','AWS','Stripe'];
 
+const NAV_LINKS = [['/#products','Produits'],['/#services','Services'],['/#about','À propos'],['/contact','Contact']];
+
+/* ─── Component ─────────────────────────────────────────────── */
 export default function Home() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [showTop, setShowTop] = useState(false);
+  const [showTop,  setShowTop]  = useState(false);
 
   useEffect(() => {
-    const fn = () => { setScrolled(window.scrollY > 20); setShowTop(window.scrollY > 500); };
-    window.addEventListener('scroll', fn);
+    const fn = () => {
+      setScrolled(window.scrollY > 10);
+      setShowTop(window.scrollY > 500);
+    };
+    window.addEventListener('scroll', fn, { passive: true });
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      {/* NAV */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all ${scrolled ? 'bg-white/95 backdrop-blur-lg shadow-sm border-b border-gray-100' : 'bg-transparent'}`}>
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 text-decoration-none">
-            <div className="w-9 h-9 bg-gradient-to-br from-gold-500 to-gold-600 rounded-xl flex items-center justify-center shadow-lg shadow-gold-500/30">
-              <Sparkles size={18} className="text-white" />
-            </div>
-            <span className="font-extrabold text-gray-900 text-base hidden sm:block">
+    <div style={{ fontFamily: "'Sora','Plus Jakarta Sans',sans-serif", background: '#FAFAF8', color: '#111', minHeight: '100vh' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&display=swap');
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+        .ani-1 { animation: fadeUp .55s .05s ease both; }
+        .ani-2 { animation: fadeUp .55s .15s ease both; }
+        .ani-3 { animation: fadeUp .55s .25s ease both; }
+        .ani-4 { animation: fadeUp .55s .35s ease both; }
+        a { text-decoration: none; color: inherit; }
+        .nav-link { font-size: 14px; font-weight: 500; color: #555; transition: color .18s; white-space: nowrap; }
+        .nav-link:hover { color: #C8931A; }
+        .btn-gold { display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#D4A017,#B07D10); color:#fff; font-weight:700; font-size:14px; padding:12px 26px; border-radius:12px; border:none; cursor:pointer; transition:all .2s; box-shadow:0 4px 18px rgba(200,147,26,.3); text-decoration:none; }
+        .btn-gold:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(200,147,26,.45); }
+        .btn-outline { display:inline-flex; align-items:center; gap:8px; background:#fff; color:#333; font-weight:600; font-size:14px; padding:12px 26px; border-radius:12px; border:1.5px solid #E5E5E5; cursor:pointer; transition:all .2s; text-decoration:none; }
+        .btn-outline:hover { border-color:#C8931A; color:#C8931A; }
+        .card { background:#fff; border:1px solid #EBEBEB; border-radius:20px; transition:all .25s; text-decoration:none; display:block; }
+        .card:hover { box-shadow:0 12px 40px rgba(0,0,0,.08); transform:translateY(-3px); border-color:#DDD; }
+        .pill { display:inline-flex; align-items:center; gap:5px; background:#F5E6C0; color:#9E7214; font-size:11px; font-weight:700; padding:4px 12px; border-radius:100px; letter-spacing:.05em; text-transform:uppercase; }
+        .tech-chip { background:#F3F3F1; color:#555; font-size:12px; font-weight:500; padding:7px 16px; border-radius:100px; transition:all .18s; border:1px solid transparent; cursor:default; }
+        .tech-chip:hover { background:#F5E6C0; color:#9E7214; }
+        .svc-icon { transition: background .2s; }
+        .service-card { background:#fff; border:1px solid #EBEBEB; border-radius:18px; padding:28px; transition:all .22s; }
+        .service-card:hover { box-shadow:0 8px 32px rgba(0,0,0,.07); transform:translateY(-2px); }
+        .service-card:hover .svc-icon { background:#F5E6C0 !important; }
+
+        /* Mobile nav — show burger only on small screens */
+        .nav-desktop { display:flex; }
+        .nav-burger  { display:none; }
+        @media(max-width:820px){
+          .nav-desktop { display:none !important; }
+          .nav-burger  { display:flex !important; }
+        }
+      `}</style>
+
+      {/* ══ IMPORTANT: pour la favicon, dans votre index.html ajoutez :
+           <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+      ══ */}
+
+      {/* ══════════ NAV ══════════ */}
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
+        /* toujours un fond solide pour éviter la superposition de texte */
+        background: scrolled ? 'rgba(250,250,248,0.97)' : '#FAFAF8',
+        backdropFilter: scrolled ? 'blur(12px)' : 'none',
+        borderBottom: scrolled ? '1px solid rgba(0,0,0,0.07)' : '1px solid transparent',
+        transition: 'background .3s, border-color .3s',
+      }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 28px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
+
+          {/* Logo */}
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+            <img src="/vite.svg" alt="Logo" width={34} height={34} style={{ borderRadius: 8 }} onError={e => { e.currentTarget.style.display='none'; }} />
+            <span style={{ fontWeight: 800, fontSize: 15, color: '#111', whiteSpace: 'nowrap' }}>
               La Faveur Infinie de Dieu
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-10">
-            {[['/#products','Produits'],['/#services','Services'],['/#about','À propos'],['/contact','Contact']].map(([href, label]) => (
-              <a key={href} href={href} className="text-sm text-gray-600 hover:text-gold-500 font-medium transition-colors">{label}</a>
+          {/* Desktop links */}
+          <div className="nav-desktop" style={{ alignItems: 'center', gap: 34 }}>
+            {NAV_LINKS.map(([href, label]) => (
+              <a key={href} href={href} className="nav-link">{label}</a>
             ))}
           </div>
 
-          <div className="hidden md:flex items-center gap-3">
-            <Link to="/contact" className="bg-gradient-to-r from-gold-500 to-gold-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:shadow-lg transition-all">
-              Nous contacter
-            </Link>
+          {/* Desktop CTA */}
+          <div className="nav-desktop">
+            <Link to="/contact" className="btn-gold">Nous contacter <ArrowRight size={15} /></Link>
           </div>
 
-          <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+          {/* Burger */}
+          <button
+            className="nav-burger"
+            onClick={() => setMenuOpen(v => !v)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: '#333', alignItems: 'center' }}
+            aria-label="Menu"
+          >
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
 
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t px-6 py-4 space-y-3">
-            {[['/#products','Produits'],['/#services','Services'],['/contact','Contact']].map(([href, label]) => (
-              <a key={href} href={href} className="block py-2 text-sm text-gray-700" onClick={() => setMobileMenuOpen(false)}>{label}</a>
+        {/* Mobile menu */}
+        {menuOpen && (
+          <div style={{ background: '#FAFAF8', borderTop: '1px solid #EBEBEB', padding: '14px 28px 22px' }}>
+            {NAV_LINKS.map(([href, label], i, arr) => (
+              <a key={href} href={href}
+                style={{ display: 'block', padding: '13px 0', fontSize: 15, color: '#444', borderBottom: i < arr.length - 1 ? '1px solid #F0F0F0' : 'none' }}
+                onClick={() => setMenuOpen(false)}
+              >{label}</a>
             ))}
-            <Link to="/contact" className="block w-full text-center bg-gold-500 text-white py-2.5 rounded-xl text-sm font-semibold">Nous contacter</Link>
+            <Link to="/contact" className="btn-gold"
+              style={{ marginTop: 18, width: '100%', justifyContent: 'center' }}
+              onClick={() => setMenuOpen(false)}
+            >
+              Nous contacter <ArrowRight size={15} />
+            </Link>
           </div>
         )}
       </nav>
 
-      {/* HERO */}
-      <section className="pt-32 pb-20 px-6 bg-gradient-to-b from-gold-50/50 to-white">
-        <div className="max-w-6xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-gold-100 text-gold-700 px-4 py-2 rounded-full text-sm font-medium mb-8">
-            <Zap size={14} /> Solutions numériques innovantes
+      {/* ══════════ HERO ══════════ */}
+      <section style={{ paddingTop: 128, paddingBottom: 100, paddingLeft: 28, paddingRight: 28, background: 'linear-gradient(160deg,#FFFDF5 0%,#FAFAF8 60%)' }}>
+        <div style={{ maxWidth: 860, margin: '0 auto', textAlign: 'center' }}>
+
+          <div className="ani-1 pill" style={{ marginBottom: 24, display: 'inline-flex' }}>
+            <Zap size={11} /> Solutions numériques innovantes
           </div>
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-gray-900 leading-tight mb-6 tracking-tight">
+
+          <h1 className="ani-2" style={{ fontSize: 'clamp(34px,5.5vw,70px)', fontWeight: 900, lineHeight: 1.07, letterSpacing: '-.03em', color: '#0A0A0A', marginBottom: 22 }}>
             Nous créons des solutions<br />
-            <span className="text-gray-700">digitales pour </span>
+            <span style={{ color: '#555' }}>digitales pour </span>
             <WordSlider />
           </h1>
-          <p className="text-lg text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-            La Faveur Infinie de Dieu développe des produits technologiques innovants : passerelle de paiement, 
-            application de facturation, et bien plus. Des solutions conçues pour les entreprises africaines et mondiales.
+
+          <p className="ani-3" style={{ fontSize: 17, color: '#666', lineHeight: 1.75, maxWidth: 540, margin: '0 auto 36px' }}>
+            La Faveur Infinie de Dieu développe des produits technologiques innovants : passerelle de paiement, application de facturation, et bien plus.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="#products" className="bg-gradient-to-r from-gold-500 to-gold-600 text-white px-8 py-4 rounded-xl font-bold hover:shadow-xl transition-all inline-flex items-center justify-center gap-2">
-              Découvrir nos produits <ArrowRight size={18} />
+
+          <div className="ani-4" style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 32 }}>
+            <a href="#products" className="btn-gold" style={{ fontSize: 15, padding: '14px 30px' }}>
+              Découvrir nos produits <ArrowRight size={17} />
             </a>
-            <Link to="/contact" className="border-2 border-gray-200 text-gray-700 px-8 py-4 rounded-xl font-bold hover:border-gold-300 transition-all inline-flex items-center justify-center">
+            <Link to="/contact" className="btn-outline" style={{ fontSize: 15, padding: '14px 30px' }}>
               Nous contacter
             </Link>
           </div>
-          <div className="flex items-center justify-center gap-6 mt-8 text-sm text-gray-500">
-            <CheckCircle size={14} className="text-emerald-500" /> Qualité garantie
-            <CheckCircle size={14} className="text-emerald-500" /> Support 24/7
-            <CheckCircle size={14} className="text-emerald-500" /> Innovation continue
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24, flexWrap: 'wrap' }}>
+            {['Qualité garantie', 'Support 24/7', 'Innovation continue'].map((t, i) => (
+              <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#888' }}>
+                <CheckCircle size={13} style={{ color: '#16A34A' }} /> {t}
+              </span>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* PRODUITS */}
-      <section id="products" className="py-20 px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-gold-100 text-gold-700 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">
-              <Zap size={12} /> Nos Produits
+      {/* ══════════ PRODUITS ══════════ */}
+      <section id="products" style={{ padding: '90px 28px', background: '#fff', borderTop: '1px solid #EBEBEB' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+
+          <div style={{ textAlign: 'center', marginBottom: 56 }}>
+            <div className="pill" style={{ marginBottom: 14, display: 'inline-flex' }}>
+              <Zap size={11} /> Nos Produits
             </div>
-            <h2 className="text-3xl sm:text-5xl font-black text-gray-900 mb-4 tracking-tight">
+            <h2 style={{ fontSize: 'clamp(26px,4vw,46px)', fontWeight: 900, color: '#0A0A0A', letterSpacing: '-.03em', lineHeight: 1.1, marginBottom: 14 }}>
               Des solutions qui font la différence
             </h2>
-            <p className="text-gray-600 max-w-xl mx-auto">
+            <p style={{ fontSize: 16, color: '#777', maxWidth: 440, margin: '0 auto' }}>
               Chaque produit est conçu avec soin pour répondre aux besoins réels des entreprises.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(290px,1fr))', gap: 22 }}>
             {PRODUCTS.map((p, i) => (
               <a key={i} href={p.link} target={p.link !== '#' ? '_blank' : '_self'} rel="noopener noreferrer"
-                className={`relative group bg-white rounded-2xl border border-gray-100 p-8 hover:shadow-xl transition-all ${p.coming ? 'opacity-80' : ''}`}>
-                {p.coming && (
-                  <div className="absolute top-3 right-3 bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full">Bientôt</div>
-                )}
-                <div className="w-14 h-14 bg-gradient-to-br from-gold-100 to-gold-200 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <p.icon size={28} style={{ color: p.color }} />
+                className="card"
+                style={{ padding: '36px 30px', position: 'relative', opacity: p.coming ? .82 : 1 }}
+              >
+                <span style={{
+                  position: 'absolute', top: 18, right: 18,
+                  fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 100,
+                  background: p.coming ? '#EDE9FE' : '#ECFDF5',
+                  color: p.coming ? '#7C3AED' : '#15803D',
+                }}>
+                  {p.tag}
+                </span>
+
+                <div style={{
+                  width: 52, height: 52, borderRadius: 16,
+                  background: `${p.accent}1A`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  marginBottom: 24,
+                }}>
+                  <p.icon size={26} style={{ color: p.accent }} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{p.name}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed mb-6">{p.desc}</p>
-                <span className="inline-flex items-center gap-2 text-sm font-bold" style={{ color: p.color }}>
-                  {p.coming ? 'Bientôt disponible' : 'Visiter le site'} <ArrowRight size={16} />
+
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111', marginBottom: 10 }}>{p.name}</h3>
+                <p style={{ fontSize: 14, color: '#777', lineHeight: 1.7, marginBottom: 22 }}>{p.desc}</p>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: p.accent }}>
+                  {p.coming ? 'Bientôt disponible' : 'Visiter le site'} <ArrowRight size={14} />
                 </span>
               </a>
             ))}
@@ -170,56 +284,93 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SERVICES */}
-      <section id="services" className="py-20 px-6 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-5xl font-black text-gray-900 mb-4">Nos Services</h2>
-            <p className="text-gray-600 max-w-xl mx-auto">De l'idée à la réalisation, nous vous accompagnons à chaque étape.</p>
+      {/* ══════════ SERVICES ══════════ */}
+      <section id="services" style={{ padding: '90px 28px', background: '#F7F7F5', borderTop: '1px solid #EBEBEB' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+
+          <div style={{ textAlign: 'center', marginBottom: 52 }}>
+            <h2 style={{ fontSize: 'clamp(26px,4vw,46px)', fontWeight: 900, color: '#0A0A0A', letterSpacing: '-.03em', marginBottom: 12 }}>
+              Nos Services
+            </h2>
+            <p style={{ fontSize: 16, color: '#777', maxWidth: 400, margin: '0 auto' }}>
+              De l'idée à la réalisation, nous vous accompagnons à chaque étape.
+            </p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 18 }}>
             {SERVICES.map((s, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-all group">
-                <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-gold-100 transition-colors">
-                  <s.icon size={20} className="text-gray-700 group-hover:text-gold-600" />
+              <div key={i} className="service-card">
+                <div className="svc-icon" style={{
+                  width: 42, height: 42, borderRadius: 12,
+                  background: '#F0F0EE',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  marginBottom: 18,
+                }}>
+                  <s.icon size={19} style={{ color: '#666' }} />
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2">{s.title}</h3>
-                <p className="text-sm text-gray-600">{s.desc}</p>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: '#111', marginBottom: 8 }}>{s.title}</h3>
+                <p style={{ fontSize: 13.5, color: '#777', lineHeight: 1.65 }}>{s.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* TECH STACK */}
-      <section className="py-16 px-6 bg-white border-t border-gray-100">
-        <div className="max-w-6xl mx-auto text-center">
-          <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Technologies utilisées</h3>
-          <div className="flex flex-wrap justify-center gap-3">
-            {TECH_STACK.map(tech => (
-              <span key={tech} className="px-4 py-2 bg-gray-100 rounded-full text-sm font-medium text-gray-700 hover:bg-gold-100 hover:text-gold-700 transition-colors">
-                {tech}
-              </span>
-            ))}
+      {/* ══════════ TECH ══════════ */}
+      <section style={{ padding: '60px 28px', background: '#fff', borderTop: '1px solid #EBEBEB' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: '#BBB', textTransform: 'uppercase', letterSpacing: '.12em', marginBottom: 22 }}>
+            Technologies utilisées
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 10 }}>
+            {TECH.map(t => <span key={t} className="tech-chip">{t}</span>)}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 px-6 bg-gradient-to-r from-gold-500 to-gold-600 text-white text-center">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl sm:text-5xl font-black mb-4">Un projet en tête ?</h2>
-          <p className="text-white/90 text-lg mb-8">Parlons-en. Nous vous aiderons à le concrétiser.</p>
-          <Link to="/contact" className="inline-flex items-center gap-2 bg-white text-gold-600 px-8 py-4 rounded-xl font-bold hover:shadow-xl transition-all">
-            Contactez-nous <ArrowRight size={18} />
+      {/* ══════════ CTA ══════════ */}
+      <section style={{ padding: '90px 28px', background: 'linear-gradient(135deg,#C8931A 0%,#9E7214 100%)', textAlign: 'center' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 'clamp(28px,4vw,50px)', fontWeight: 900, color: '#fff', letterSpacing: '-.03em', lineHeight: 1.1, marginBottom: 16 }}>
+            Un projet en tête ?
+          </h2>
+          <p style={{ fontSize: 17, color: 'rgba(255,255,255,.85)', marginBottom: 36, lineHeight: 1.65 }}>
+            Parlons-en. Nous vous aiderons à le concrétiser.
+          </p>
+          <Link to="/contact" style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            background: '#fff', color: '#9E7214', fontWeight: 700, fontSize: 15,
+            padding: '15px 36px', borderRadius: 12, textDecoration: 'none',
+            boxShadow: '0 6px 28px rgba(0,0,0,.15)', transition: 'all .2s'
+          }}>
+            Contactez-nous <ArrowRight size={17} />
           </Link>
         </div>
       </section>
 
+      {/* ══════════ FOOTER ══════════ */}
+      <footer style={{ background: '#0A0A0A', padding: '36px 28px', textAlign: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
+          <img src="/vite.svg" alt="Logo" width={24} height={24} style={{ borderRadius: 6, opacity: .7 }} />
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#666' }}>La Faveur Infinie de Dieu</span>
+        </div>
+        <p style={{ fontSize: 12, color: '#444' }}>© {new Date().getFullYear()} Tous droits réservés · Bénin 🇧🇯</p>
+      </footer>
+
+      {/* Scroll top */}
       {showTop && (
-        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-6 right-6 z-50 w-11 h-11 bg-white border border-gray-200 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all">
-          <ArrowUp size={18} />
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          aria-label="Retour en haut"
+          style={{
+            position: 'fixed', bottom: 26, right: 26, zIndex: 999,
+            width: 42, height: 42, borderRadius: 12,
+            background: '#fff', border: '1.5px solid #E5E5E5',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 18px rgba(0,0,0,.12)', transition: 'all .2s', color: '#555',
+          }}
+        >
+          <ArrowUp size={17} />
         </button>
       )}
     </div>
