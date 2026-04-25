@@ -108,10 +108,11 @@ function FloatingBadge({ style, children }) {
 
 /* ─── Produits en dur ─────────────────────────────────── */
 const STATIC_PRODUCTS = [
-  { name: 'Passerelle de Paiement', desc: '15 providers, 40+ pays, Mobile Money, cartes, PayPal. API REST complète.',                icon: Globe,    link: 'https://payment-gateway-iota-bay.vercel.app', accent: '#C8931A', tag: 'En ligne' },
-  { name: 'Facture App',            desc: 'Factures, contrats, paiements en ligne. Assistant IA intégré pour freelances et PME.',    icon: Shield,   link: 'https://facture-app-sigma.vercel.app',           accent: '#2563EB', tag: 'En ligne' },
-  { name: 'Prochain Produit',       desc: 'Une nouvelle solution innovante en cours de développement. Restez connecté.',             icon: Sparkles, link: '#',                                              accent: '#7C3AED', tag: 'Bientôt', coming: true },
+  { name: 'Passerelle de Paiement', desc: '15 providers, 40+ pays, Mobile Money, cartes, PayPal. API REST complète.',             icon: Globe,    link: 'https://payment-gateway-iota-bay.vercel.app', accent: '#C8931A', tag: 'En ligne' },
+  { name: 'Facture App',            desc: 'Factures, contrats, paiements en ligne. Assistant IA intégré pour freelances et PME.', icon: Shield,   link: 'https://facture-app-sigma.vercel.app',           accent: '#2563EB', tag: 'En ligne' },
 ];
+
+const COMING_PRODUCT = { name: 'Prochain Produit', desc: 'Une nouvelle solution innovante en cours de développement. Restez connecté.', icon: Sparkles, link: '#', accent: '#7C3AED', tag: 'Bientôt', coming: true };
 
 /* ─── Carte pour un produit Firebase ─────────────────── */
 function FirebaseProductCard({ p }) {
@@ -371,6 +372,25 @@ export default function Home() {
               .filter(p => p.active !== false)
               .map(p => <FirebaseProductCard key={p.id} p={p} />)
             }
+
+            {/* ── Prochain Produit — toujours en dernier ── */}
+            {(() => {
+              const p = COMING_PRODUCT;
+              return (
+                <div key="coming" className="prod-card"
+                  style={{ padding: '36px 30px', position: 'relative', opacity: 0.82 }}>
+                  <span style={{ position: 'absolute', top: 18, right: 18, fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 100, background: '#EDE9FE', color: '#7C3AED' }}>{p.tag}</span>
+                  <div style={{ width: 52, height: 52, borderRadius: 16, background: `${p.accent}1A`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+                    <p.icon size={26} style={{ color: p.accent }} />
+                  </div>
+                  <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111', marginBottom: 10 }}>{p.name}</h3>
+                  <p style={{ fontSize: 14, color: '#777', lineHeight: 1.7, marginBottom: 22 }}>{p.desc}</p>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: p.accent }}>
+                    Bientôt disponible <ArrowRight size={14} />
+                  </span>
+                </div>
+              );
+            })()}
 
           </div>
         </div>
