@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import {
   ArrowRight, Globe, Code2, Smartphone, Shield, CheckCircle,
   Zap, ArrowUp, Menu, X, Sparkles, Cloud, Database, Palette,
-  BarChart3, CreditCard, TrendingUp, ExternalLink
+  BarChart3, CreditCard, TrendingUp, ExternalLink, Package
 } from 'lucide-react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../../services/firebase';
 
 /* ─── Word slider ─────────────────────────────────────── */
 const SLIDE_WORDS = [
@@ -37,7 +39,6 @@ function WordSlider() {
   );
 }
 
-/* ─── Logo SVG inline (pas de fichier externe) ─────────── */
 function LFDLogo({ size = 34 }) {
   return (
     <div style={{
@@ -51,7 +52,6 @@ function LFDLogo({ size = 34 }) {
   );
 }
 
-/* ─── Hero mock — produits en miniature ─────────────────── */
 function HeroMock() {
   return (
     <div style={{
@@ -60,7 +60,6 @@ function HeroMock() {
       border: '1px solid #F0F0F0',
       padding: 24, width: 310, fontFamily: 'inherit'
     }}>
-      {/* header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
         <div>
           <div style={{ fontSize: 10, fontWeight: 700, color: '#BBB', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Nos produits</div>
@@ -68,13 +67,11 @@ function HeroMock() {
         </div>
         <span style={{ background: '#ECFDF5', color: '#15803D', fontSize: 11, fontWeight: 700, padding: '5px 11px', borderRadius: 100 }}>En ligne ✓</span>
       </div>
-      {/* mini bar chart */}
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 44, marginBottom: 18 }}>
         {[20,45,30,65,50,80,55,75,60,95,70,88].map((h, i) => (
-          <div key={i} style={{ flex: 1, height: `${h}%`, borderRadius: 4, background: i === 9 ? '#C8931A' : '#F3F3F1', transition: 'height .3s' }} />
+          <div key={i} style={{ flex: 1, height: `${h}%`, borderRadius: 4, background: i === 9 ? '#C8931A' : '#F3F3F1' }} />
         ))}
       </div>
-      {/* product rows */}
       {[
         { name: 'Passerelle Paiement', flag: '🌍', badge: '40+ pays', color: '#C8931A' },
         { name: 'Facture App',         flag: '🇧🇯', badge: 'IA intégrée', color: '#2563EB' },
@@ -109,12 +106,47 @@ function FloatingBadge({ style, children }) {
   );
 }
 
-/* ─── Data ──────────────────────────────────────────────── */
-const PRODUCTS = [
-  { name: 'Passerelle de Paiement', desc: '15 providers, 40+ pays, Mobile Money, cartes, PayPal. API REST complète.', icon: Globe,    link: 'https://payment-gateway-iota-bay.vercel.app', accent: '#C8931A', tag: 'En ligne' },
+/* ─── Produits en dur ─────────────────────────────────── */
+const STATIC_PRODUCTS = [
+  { name: 'Passerelle de Paiement', desc: '15 providers, 40+ pays, Mobile Money, cartes, PayPal. API REST complète.',                icon: Globe,    link: 'https://payment-gateway-iota-bay.vercel.app', accent: '#C8931A', tag: 'En ligne' },
   { name: 'Facture App',            desc: 'Factures, contrats, paiements en ligne. Assistant IA intégré pour freelances et PME.',    icon: Shield,   link: 'https://facture-app-sigma.vercel.app',           accent: '#2563EB', tag: 'En ligne' },
   { name: 'Prochain Produit',       desc: 'Une nouvelle solution innovante en cours de développement. Restez connecté.',             icon: Sparkles, link: '#',                                              accent: '#7C3AED', tag: 'Bientôt', coming: true },
 ];
+
+/* ─── Carte pour un produit Firebase ─────────────────── */
+function FirebaseProductCard({ p }) {
+  const accent = '#C8931A';
+  const content = (
+    <>
+      <span style={{
+        position: 'absolute', top: 18, right: 18, fontSize: 10, fontWeight: 700,
+        padding: '3px 10px', borderRadius: 100,
+        background: p.active !== false ? '#ECFDF5' : '#F3F4F6',
+        color:      p.active !== false ? '#15803D' : '#6B7280',
+      }}>
+        {p.active !== false ? 'En ligne' : 'Inactif'}
+      </span>
+      <div style={{ width: 52, height: 52, borderRadius: 16, background: '#F5E6C0', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, fontSize: 26 }}>
+        {p.emoji || <Package size={26} style={{ color: accent }} />}
+      </div>
+      <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111', marginBottom: 10 }}>{p.name}</h3>
+      {p.description && <p style={{ fontSize: 14, color: '#777', lineHeight: 1.7, marginBottom: 22 }}>{p.description}</p>}
+      {p.category && <span style={{ display: 'inline-block', fontSize: 11, fontWeight: 600, color: '#999', background: '#F3F3F1', padding: '3px 10px', borderRadius: 100, marginBottom: 14 }}>{p.category}</span>}
+      {p.link && (
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: accent }}>
+          Visiter le site <ExternalLink size={13} />
+        </div>
+      )}
+    </>
+  );
+
+  const cardStyle = { background: '#fff', border: '1px solid #EBEBEB', borderRadius: 20, padding: '36px 30px', position: 'relative', display: 'block', transition: 'all .25s', textDecoration: 'none' };
+
+  if (p.link) {
+    return <a href={p.link} target="_blank" rel="noopener noreferrer" className="prod-card" style={cardStyle}>{content}</a>;
+  }
+  return <div className="prod-card" style={cardStyle}>{content}</div>;
+}
 
 const SERVICES = [
   { icon: Code2,      title: 'Développement Web',   desc: 'Sites vitrines, applications web, plateformes SaaS sur mesure.' },
@@ -126,7 +158,6 @@ const SERVICES = [
 ];
 
 const TECH = ['React','Vue.js','Node.js','Firebase','Vercel','TailwindCSS','Python','Flutter','MongoDB','PostgreSQL','AWS','Stripe'];
-
 const NAV_LINKS = [['/#products','Produits'],['/#services','Services'],['/#about','À propos'],['/contact','Contact']];
 
 /* ─── Component ─────────────────────────────────────────── */
@@ -134,11 +165,19 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showTop,  setShowTop]  = useState(false);
+  const [dbProducts, setDbProducts] = useState([]);
 
   useEffect(() => {
     const fn = () => { setScrolled(window.scrollY > 10); setShowTop(window.scrollY > 500); };
     window.addEventListener('scroll', fn, { passive: true });
     return () => window.removeEventListener('scroll', fn);
+  }, []);
+
+  /* Chargement des produits Firebase */
+  useEffect(() => {
+    getDocs(collection(db, 'products'))
+      .then(snap => setDbProducts(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
+      .catch(console.error);
   }, []);
 
   return (
@@ -187,33 +226,23 @@ export default function Home() {
         transition: 'background .3s, border-color .3s',
       }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 28px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
-
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
             <LFDLogo size={34} />
-            <span style={{ fontWeight: 800, fontSize: 15, color: '#111', whiteSpace: 'nowrap' }}>
-              La Faveur Infinie de Dieu
-            </span>
+            <span style={{ fontWeight: 800, fontSize: 15, color: '#111', whiteSpace: 'nowrap' }}>La Faveur Infinie de Dieu</span>
           </Link>
-
           <div className="nav-desktop" style={{ alignItems: 'center', gap: 34 }}>
             {NAV_LINKS.map(([href, label]) => (
               <a key={href} href={href} className="nav-link">{label}</a>
             ))}
           </div>
-
           <div className="nav-desktop">
             <Link to="/contact" className="btn-gold">Nous contacter <ArrowRight size={15} /></Link>
           </div>
-
-          <button
-            className="nav-burger"
-            onClick={() => setMenuOpen(v => !v)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: '#333', alignItems: 'center' }}
-          >
+          <button className="nav-burger" onClick={() => setMenuOpen(v => !v)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: '#333', alignItems: 'center' }}>
             {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
-
         {menuOpen && (
           <div style={{ background: '#FAFAF8', borderTop: '1px solid #EBEBEB', padding: '14px 28px 22px' }}>
             {NAV_LINKS.map(([href, label], i, arr) => (
@@ -232,8 +261,6 @@ export default function Home() {
       {/* ══ HERO ══ */}
       <section style={{ background: 'linear-gradient(155deg,#FFFDF5 0%,#FAFAF8 65%)', borderBottom: '1px solid #EBEBEB' }}>
         <div className="hero-grid" style={{ maxWidth: 1200, margin: '0 auto', padding: '118px 32px 90px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, alignItems: 'center' }}>
-
-          {/* LEFT */}
           <div className="ani-1">
             <div className="pill ani-1" style={{ marginBottom: 20, display: 'inline-flex' }}>
               <Zap size={11} /> Solutions numériques innovantes
@@ -262,8 +289,6 @@ export default function Home() {
               ))}
             </div>
           </div>
-
-          {/* RIGHT — visuel flottant */}
           <div className="hero-visual" style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', height: 460 }}>
             <FloatingBadge style={{ top: 22, right: 0 }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#16A34A', display: 'inline-block' }} />
@@ -277,7 +302,6 @@ export default function Home() {
             </FloatingBadge>
             <div className="lfd-float"><HeroMock /></div>
           </div>
-
         </div>
       </section>
 
@@ -285,10 +309,10 @@ export default function Home() {
       <div style={{ background: '#fff', borderBottom: '1px solid #EBEBEB' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))' }}>
           {[
-            { icon: Globe,      val: '40+',   lbl: 'Pays couverts' },
-            { icon: CreditCard, val: '2',      lbl: 'Produits live' },
-            { icon: TrendingUp, val: '99.9%',  lbl: 'Disponibilité' },
-            { icon: Zap,        val: '24/7',   lbl: 'Support actif' },
+            { icon: Globe,      val: '40+',  lbl: 'Pays couverts' },
+            { icon: CreditCard, val: '2',    lbl: 'Produits live' },
+            { icon: TrendingUp, val: '99.9%',lbl: 'Disponibilité' },
+            { icon: Zap,        val: '24/7', lbl: 'Support actif' },
           ].map((s, i, arr) => (
             <div key={i} style={{ padding: '28px 24px', borderRight: i < arr.length - 1 ? '1px solid #EBEBEB' : 'none', display: 'flex', alignItems: 'center', gap: 14 }}>
               <div style={{ width: 42, height: 42, borderRadius: 12, background: '#F5E6C0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -317,8 +341,11 @@ export default function Home() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(290px,1fr))', gap: 22 }}>
-            {PRODUCTS.map((p, i) => (
-              <a key={i} href={p.link} target={p.link !== '#' ? '_blank' : '_self'} rel="noopener noreferrer"
+
+            {/* ── Produits en dur ── */}
+            {STATIC_PRODUCTS.map((p, i) => (
+              <a key={`static-${i}`}
+                href={p.link} target={p.link !== '#' ? '_blank' : '_self'} rel="noopener noreferrer"
                 className="prod-card"
                 style={{ padding: '36px 30px', position: 'relative', opacity: p.coming ? .82 : 1 }}
               >
@@ -328,7 +355,6 @@ export default function Home() {
                   background: p.coming ? '#EDE9FE' : '#ECFDF5',
                   color: p.coming ? '#7C3AED' : '#15803D',
                 }}>{p.tag}</span>
-
                 <div style={{ width: 52, height: 52, borderRadius: 16, background: `${p.accent}1A`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
                   <p.icon size={26} style={{ color: p.accent }} />
                 </div>
@@ -339,6 +365,13 @@ export default function Home() {
                 </span>
               </a>
             ))}
+
+            {/* ── Produits Firebase (actifs uniquement) ── */}
+            {dbProducts
+              .filter(p => p.active !== false)
+              .map(p => <FirebaseProductCard key={p.id} p={p} />)
+            }
+
           </div>
         </div>
       </section>
@@ -379,7 +412,7 @@ export default function Home() {
         <div style={{ maxWidth: 640, margin: '0 auto' }}>
           <h2 style={{ fontSize: 'clamp(28px,4vw,50px)', fontWeight: 900, color: '#fff', letterSpacing: '-.03em', lineHeight: 1.1, marginBottom: 16 }}>Un projet en tête ?</h2>
           <p style={{ fontSize: 17, color: 'rgba(255,255,255,.85)', marginBottom: 36, lineHeight: 1.65 }}>Parlons-en. Nous vous aiderons à le concrétiser.</p>
-          <Link to="/contact" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', color: '#9E7214', fontWeight: 700, fontSize: 15, padding: '15px 36px', borderRadius: 12, textDecoration: 'none', boxShadow: '0 6px 28px rgba(0,0,0,.15)', transition: 'all .2s' }}>
+          <Link to="/contact" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', color: '#9E7214', fontWeight: 700, fontSize: 15, padding: '15px 36px', borderRadius: 12, textDecoration: 'none', boxShadow: '0 6px 28px rgba(0,0,0,.15)' }}>
             Contactez-nous <ArrowRight size={17} />
           </Link>
         </div>
