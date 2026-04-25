@@ -144,8 +144,11 @@ function FirebaseProductCard({ p }) {
       }}>
         {p.active !== false ? 'En ligne' : 'Inactif'}
       </span>
-      <div style={{ width: 52, height: 52, borderRadius: 16, background: '#F5E6C0', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, fontSize: 26 }}>
-        {p.emoji || <Package size={26} style={{ color: accent }} />}
+      <div style={{ width: 52, height: 52, borderRadius: 16, background: '#F5E6C0', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+        {p.emoji && p.emoji.trim()
+          ? <span style={{ fontSize: 26, lineHeight: 1 }}>{p.emoji.trim()}</span>
+          : <Package size={26} style={{ color: accent }} />
+        }
       </div>
       <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111', marginBottom: 10 }}>{p.name}</h3>
       {p.description && <p style={{ fontSize: 14, color: '#777', lineHeight: 1.7, marginBottom: 22 }}>{p.description}</p>}
@@ -184,6 +187,7 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const [showTop,  setShowTop]  = useState(false);
   const [dbProducts, setDbProducts] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(12);
 
   useEffect(() => {
     const fn = () => { setScrolled(window.scrollY > 10); setShowTop(window.scrollY > 500); };
@@ -361,58 +365,83 @@ export default function Home() {
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(290px,1fr))', gap: 22 }}>
-
-            {/* ── Produits en dur ── */}
-            {STATIC_PRODUCTS.map((p, i) => (
-              <a key={`static-${i}`}
-                href={p.link} target={p.link !== '#' ? '_blank' : '_self'} rel="noopener noreferrer"
-                className="prod-card"
-                style={{ padding: '36px 30px', position: 'relative', opacity: p.coming ? .82 : 1 }}
-              >
-                <span style={{
-                  position: 'absolute', top: 18, right: 18, fontSize: 10, fontWeight: 700,
-                  padding: '3px 10px', borderRadius: 100,
-                  background: p.coming ? '#EDE9FE' : '#ECFDF5',
-                  color: p.coming ? '#7C3AED' : '#15803D',
-                }}>{p.tag}</span>
-                <div style={{ width: 52, height: 52, borderRadius: 16, background: `${p.accent}1A`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
-                  <p.icon size={26} style={{ color: p.accent }} />
-                </div>
-                <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111', marginBottom: 10 }}>{p.name}</h3>
-                <p style={{ fontSize: 14, color: '#777', lineHeight: 1.7, marginBottom: 22 }}>{p.desc}</p>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: p.accent }}>
-                  {p.coming ? 'Bientôt disponible' : 'Visiter le site'} {p.coming ? <ArrowRight size={14} /> : <ExternalLink size={13} />}
-                </span>
-              </a>
-            ))}
-
-            {/* ── Produits Firebase (actifs uniquement) ── */}
-            {dbProducts
+          {(() => {
+            /* Toute la liste ordonnée : statiques + Firebase actifs + "Prochain" en dernier */
+            const staticCards = STATIC_PRODUCTS.map((p, i) => ({
+              key: `static-${i}`, type: 'static', data: p
+            }));
+            const dbCards = dbProducts
               .filter(p => p.active !== false)
-              .map(p => <FirebaseProductCard key={p.id} p={p} />)
-            }
+              .map(p => ({ key: p.id, type: 'db', data: p }));
+            const comingCard = { key: 'coming', type: 'coming', data: COMING_PRODUCT };
+            const allCards = [...staticCards, ...dbCards, comingCard];
+            const visible  = allCards.slice(0, visibleCount);
+            const hasMore  = allCards.length > visibleCount;
 
-            {/* ── Prochain Produit — toujours en dernier ── */}
-            {(() => {
-              const p = COMING_PRODUCT;
-              return (
-                <div key="coming" className="prod-card"
-                  style={{ padding: '36px 30px', position: 'relative', opacity: 0.82 }}>
-                  <span style={{ position: 'absolute', top: 18, right: 18, fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 100, background: '#EDE9FE', color: '#7C3AED' }}>{p.tag}</span>
-                  <div style={{ width: 52, height: 52, borderRadius: 16, background: `${p.accent}1A`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
-                    <p.icon size={26} style={{ color: p.accent }} />
-                  </div>
-                  <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111', marginBottom: 10 }}>{p.name}</h3>
-                  <p style={{ fontSize: 14, color: '#777', lineHeight: 1.7, marginBottom: 22 }}>{p.desc}</p>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: p.accent }}>
-                    Bientôt disponible <ArrowRight size={14} />
-                  </span>
+            return (
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(290px,1fr))', gap: 22 }}>
+                  {visible.map(({ key, type, data: p }) => {
+                    if (type === 'static') return (
+                      <a key={key}
+                        href={p.link} target={p.link !== '#' ? '_blank' : '_self'} rel="noopener noreferrer"
+                        className="prod-card"
+                        style={{ padding: '36px 30px', position: 'relative' }}
+                      >
+                        <span style={{ position: 'absolute', top: 18, right: 18, fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 100, background: '#ECFDF5', color: '#15803D' }}>{p.tag}</span>
+                        <div style={{ width: 52, height: 52, borderRadius: 16, background: `${p.accent}1A`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+                          <p.icon size={26} style={{ color: p.accent }} />
+                        </div>
+                        <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111', marginBottom: 10 }}>{p.name}</h3>
+                        <p style={{ fontSize: 14, color: '#777', lineHeight: 1.7, marginBottom: 22 }}>{p.desc}</p>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: p.accent }}>
+                          Visiter le site <ExternalLink size={13} />
+                        </span>
+                      </a>
+                    );
+                    if (type === 'db') return <FirebaseProductCard key={key} p={p} />;
+                    /* coming */
+                    return (
+                      <div key={key} className="prod-card" style={{ padding: '36px 30px', position: 'relative', opacity: 0.82 }}>
+                        <span style={{ position: 'absolute', top: 18, right: 18, fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 100, background: '#EDE9FE', color: '#7C3AED' }}>{p.tag}</span>
+                        <div style={{ width: 52, height: 52, borderRadius: 16, background: `${p.accent}1A`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+                          <p.icon size={26} style={{ color: p.accent }} />
+                        </div>
+                        <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111', marginBottom: 10 }}>{p.name}</h3>
+                        <p style={{ fontSize: 14, color: '#777', lineHeight: 1.7, marginBottom: 22 }}>{p.desc}</p>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: p.accent }}>
+                          Bientôt disponible <ArrowRight size={14} />
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })()}
 
-          </div>
+                {/* Bouton Suivant */}
+                {hasMore && (
+                  <div style={{ textAlign: 'center', marginTop: 36 }}>
+                    <button
+                      onClick={() => setVisibleCount(c => c + 12)}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 8,
+                        background: '#fff', border: '1.5px solid #E5E5E5',
+                        color: '#555', fontWeight: 600, fontSize: 14,
+                        padding: '13px 30px', borderRadius: 12, cursor: 'pointer',
+                        transition: 'all .2s', fontFamily: 'inherit',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor='#C8931A'; e.currentTarget.style.color='#C8931A'; }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor='#E5E5E5'; e.currentTarget.style.color='#555'; }}
+                    >
+                      Voir plus <ArrowRight size={15} />
+                      <span style={{ fontSize: 12, color: '#AAA', fontWeight: 500 }}>
+                        ({allCards.length - visibleCount} restant{allCards.length - visibleCount > 1 ? 's' : ''})
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </section>
 
