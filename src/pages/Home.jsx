@@ -5,7 +5,7 @@ import {
   Zap, ArrowUp, Menu, X, Sparkles, Cloud, Database, Palette,
   BarChart3, CreditCard, TrendingUp, ExternalLink, Package
 } from 'lucide-react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../services/firebase';
 
 /* ─── Word slider ─────────────────────────────────────── */
@@ -52,7 +52,20 @@ function LFDLogo({ size = 34 }) {
   );
 }
 
-function HeroMock() {
+/* Couleurs accent selon index */
+const ACCENT_COLORS = ['#C8931A','#2563EB','#16A34A','#7C3AED','#DC2626','#0891B2'];
+
+function HeroMock({ staticProducts, dbProducts }) {
+  /* Fusion : statiques en dur + Firebase, "Prochain Produit" toujours en dernier */
+  const activeDb = dbProducts.filter(p => p.active !== false);
+  const allRows = [
+    ...staticProducts,
+    ...activeDb,
+    { name: 'Prochain Produit', emoji: '✨', tag: 'Bientôt', coming: true },
+  ].slice(0, 5); /* max 5 lignes pour ne pas déborder */
+
+  const liveCount = staticProducts.length + activeDb.length;
+
   return (
     <div style={{
       background: '#fff', borderRadius: 20,
@@ -60,32 +73,36 @@ function HeroMock() {
       border: '1px solid #F0F0F0',
       padding: 24, width: 310, fontFamily: 'inherit'
     }}>
+      {/* header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
         <div>
           <div style={{ fontSize: 10, fontWeight: 700, color: '#BBB', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>Nos produits</div>
-          <div style={{ fontSize: 18, fontWeight: 900, color: '#111', letterSpacing: '-.02em' }}>2 solutions live</div>
+          <div style={{ fontSize: 18, fontWeight: 900, color: '#111', letterSpacing: '-.02em' }}>{liveCount} solution{liveCount > 1 ? 's' : ''} live</div>
         </div>
         <span style={{ background: '#ECFDF5', color: '#15803D', fontSize: 11, fontWeight: 700, padding: '5px 11px', borderRadius: 100 }}>En ligne ✓</span>
       </div>
+      {/* mini bar chart */}
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 44, marginBottom: 18 }}>
         {[20,45,30,65,50,80,55,75,60,95,70,88].map((h, i) => (
           <div key={i} style={{ flex: 1, height: `${h}%`, borderRadius: 4, background: i === 9 ? '#C8931A' : '#F3F3F1' }} />
         ))}
       </div>
-      {[
-        { name: 'Passerelle Paiement', flag: '🌍', badge: '40+ pays', color: '#C8931A' },
-        { name: 'Facture App',         flag: '🇧🇯', badge: 'IA intégrée', color: '#2563EB' },
-        { name: 'Prochain produit',    flag: '✨',  badge: 'Bientôt',    color: '#7C3AED' },
-      ].map((p, i) => (
-        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderBottom: i < 2 ? '1px solid #F5F5F5' : 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: `${p.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>{p.flag}</div>
-            <span style={{ fontSize: 12, color: '#444', fontWeight: 600 }}>{p.name}</span>
+      {/* product rows */}
+      {allRows.map((p, i) => {
+        const accent = p.coming ? '#7C3AED' : (p.accent || ACCENT_COLORS[i % ACCENT_COLORS.length]);
+        const badge  = p.coming ? 'Bientôt' : (p.tag || 'En ligne');
+        const icon   = p.emoji || (p.coming ? '✨' : '📦');
+        return (
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < allRows.length - 1 ? '1px solid #F5F5F5' : 'none' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 26, height: 26, borderRadius: 7, background: `${accent}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>{icon}</div>
+              <span style={{ fontSize: 12, color: '#444', fontWeight: 600, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
+            </div>
+            <span style={{ fontSize: 10, fontWeight: 700, color: accent, background: `${accent}12`, padding: '2px 8px', borderRadius: 100, flexShrink: 0 }}>{badge}</span>
           </div>
-          <span style={{ fontSize: 11, fontWeight: 700, color: p.color, background: `${p.color}12`, padding: '2px 8px', borderRadius: 100 }}>{p.badge}</span>
-        </div>
-      ))}
-      <div style={{ marginTop: 16, background: 'linear-gradient(135deg,#C8931A,#9E7214)', color: '#fff', textAlign: 'center', borderRadius: 11, padding: '10px 0', fontSize: 13, fontWeight: 700 }}>
+        );
+      })}
+      <div style={{ marginTop: 14, background: 'linear-gradient(135deg,#C8931A,#9E7214)', color: '#fff', textAlign: 'center', borderRadius: 11, padding: '10px 0', fontSize: 13, fontWeight: 700 }}>
         Découvrir nos produits →
       </div>
     </div>
@@ -174,11 +191,14 @@ export default function Home() {
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
-  /* Chargement des produits Firebase */
+  /* Produits Firebase en temps réel */
   useEffect(() => {
-    getDocs(collection(db, 'products'))
-      .then(snap => setDbProducts(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
-      .catch(console.error);
+    const unsub = onSnapshot(
+      collection(db, 'products'),
+      snap => setDbProducts(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+      console.error
+    );
+    return () => unsub();
   }, []);
 
   return (
@@ -293,7 +313,7 @@ export default function Home() {
           <div className="hero-visual" style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', height: 460 }}>
             <FloatingBadge style={{ top: 22, right: 0 }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#16A34A', display: 'inline-block' }} />
-              2 produits en ligne 🚀
+              {STATIC_PRODUCTS.length + dbProducts.filter(p => p.active !== false).length} produit{STATIC_PRODUCTS.length + dbProducts.filter(p => p.active !== false).length > 1 ? 's' : ''} en ligne 🚀
             </FloatingBadge>
             <FloatingBadge style={{ top: 185, left: -24 }}>
               <Globe size={13} style={{ color: '#C8931A' }} /> 40+ pays supportés 🌍
@@ -301,7 +321,7 @@ export default function Home() {
             <FloatingBadge style={{ bottom: 55, right: -8 }}>
               <Zap size={13} style={{ color: '#7C3AED' }} /> Innovation continue ✨
             </FloatingBadge>
-            <div className="lfd-float"><HeroMock /></div>
+            <div className="lfd-float"><HeroMock staticProducts={STATIC_PRODUCTS} dbProducts={dbProducts} /></div>
           </div>
         </div>
       </section>
@@ -311,7 +331,7 @@ export default function Home() {
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))' }}>
           {[
             { icon: Globe,      val: '40+',  lbl: 'Pays couverts' },
-            { icon: CreditCard, val: '2',    lbl: 'Produits live' },
+            { icon: CreditCard, val: STATIC_PRODUCTS.length + dbProducts.filter(p => p.active !== false).length, lbl: 'Produits live' },
             { icon: TrendingUp, val: '99.9%',lbl: 'Disponibilité' },
             { icon: Zap,        val: '24/7', lbl: 'Support actif' },
           ].map((s, i, arr) => (
