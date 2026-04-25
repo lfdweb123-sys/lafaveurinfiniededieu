@@ -6,7 +6,7 @@ import {
   BarChart3, CreditCard, TrendingUp, ExternalLink, Package
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../services/firebase';
+import { db } from '../services/firebase';
 
 /* ─── Word slider ─────────────────────────────────────── */
 const SLIDE_WORDS = [
