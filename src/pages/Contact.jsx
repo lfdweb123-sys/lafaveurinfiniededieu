@@ -1,15 +1,36 @@
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-react';
+import { sendEmail, getContactEmailTemplate } from '../services/brevo';
 import toast from 'react-hot-toast';
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSent(true);
-    toast.success('Message envoyé ! Nous vous répondrons sous 24h.');
+    setLoading(true);
+    try {
+      // Envoyer l'email à l'admin
+      const result = await sendEmail({
+        to: 'lfdweb123@gmail.com',
+        toName: 'Admin LFD',
+        subject: `[Contact LFD] ${form.subject || 'Nouveau message'}`,
+        htmlContent: getContactEmailTemplate(form)
+      });
+
+      if (result.success) {
+        setSent(true);
+        toast.success('Message envoyé ! Nous vous répondrons sous 24h.');
+      } else {
+        toast.error('Erreur lors de l\'envoi. Réessayez.');
+      }
+    } catch {
+      toast.error('Erreur de connexion');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (sent) {
@@ -53,28 +74,29 @@ export default function Contact() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Nom</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Nom *</label>
                 <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gold-400 outline-none" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Email</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Email *</label>
                 <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gold-400 outline-none" />
               </div>
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Sujet</label>
-              <input type="text" value={form.subject} onChange={e => setForm({...form, subject: e.target.value})} required
+              <input type="text" value={form.subject} onChange={e => setForm({...form, subject: e.target.value})}
                 className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gold-400 outline-none" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Message</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Message *</label>
               <textarea value={form.message} onChange={e => setForm({...form, message: e.target.value})} required rows="4"
                 className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gold-400 outline-none resize-none" />
             </div>
-            <button type="submit" className="bg-gradient-to-r from-gold-500 to-gold-600 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:shadow-lg transition-all">
-              <Send size={14} /> Envoyer le message
+            <button type="submit" disabled={loading}
+              className="bg-gradient-to-r from-gold-500 to-gold-600 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:shadow-lg transition-all disabled:opacity-50">
+              {loading ? 'Envoi...' : <><Send size={14} /> Envoyer le message</>}
             </button>
           </form>
         </div>
