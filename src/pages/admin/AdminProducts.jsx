@@ -7,27 +7,52 @@ import toast from 'react-hot-toast';
 const EMOJI_LIST = [
   '📦','🌍','🚀','📤','💳','🧾','📁','⚡','🛒','🔗','💼','🏪',
   '📊','🔐','💰','📱','🌐','🤖','✨','🛠','📝','🎯','🏆','💡',
+  '🎓','🔧','📲','💻','🏠','🚗','✈️','🍽️','🎵','📸','🔬','🏥',
+  '⚽','🎮','🌱','☀️','🐾','🛡️','🔑','📡','🎪','🏗️','💎','🌟',
+  '✝️','🙏','📖','⛪','🕊️','🎺','💐','🌈','🔔','🕯️','🫶','👑',
 ];
 
 function EmojiPicker({ value, onChange }) {
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ position: 'relative' }}>
-      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Emoji</label>
-      <button
-        type="button"
-        onClick={() => setOpen(v => !v)}
-        style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: 12, fontSize: 24, cursor: 'pointer', background: '#F9FAFB', textAlign: 'center', lineHeight: 1 }}
-      >
-        {value || '📦'}
-      </button>
+    <>
+      <div>
+        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Emoji</label>
+        <button
+          type="button"
+          onClick={() => setOpen(v => !v)}
+          style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: 12, fontSize: 24, cursor: 'pointer', background: '#F9FAFB', textAlign: 'center', lineHeight: 1 }}
+        >
+          {value || '📦'}
+        </button>
+      </div>
+
+      {/* Overlay plein écran pour fermer */}
+      {open && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 200 }}
+          onClick={() => setOpen(false)}
+        />
+      )}
+
+      {/* Picker positionné en fixed au centre */}
       {open && (
         <div style={{
-          position: 'absolute', top: '100%', left: 0, zIndex: 100,
-          background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14,
-          padding: 12, marginTop: 4,
-          display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6,
-          boxShadow: '0 8px 32px rgba(0,0,0,.12)', width: 220,
+          position: 'fixed',
+          top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 201,
+          background: '#fff',
+          border: '1px solid #E5E7EB',
+          borderRadius: 16,
+          padding: 16,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(8, 1fr)',
+          gap: 6,
+          boxShadow: '0 16px 48px rgba(0,0,0,.18)',
+          width: 340,
+          maxHeight: '70vh',
+          overflowY: 'auto',
         }}>
           {EMOJI_LIST.map(e => (
             <button
@@ -48,7 +73,7 @@ function EmojiPicker({ value, onChange }) {
           ))}
         </div>
       )}
-    </div>
+    </>
   );
 }
 
