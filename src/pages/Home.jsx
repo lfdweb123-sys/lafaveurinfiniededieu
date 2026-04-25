@@ -385,66 +385,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ══ FOOTER ══ */}
-      <footer style={{ background: '#0A0A0A', padding: '56px 28px 32px' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 48, marginBottom: 48 }}>
 
-            {/* Brand col */}
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                <LFDLogo size={32} />
-                <span style={{ fontSize: 15, fontWeight: 800, color: '#fff' }}>LFD</span>
-              </div>
-              <p style={{ fontSize: 13, color: '#888', lineHeight: 1.75, marginBottom: 18, maxWidth: 260 }}>
-                Solutions numériques innovantes pour l'Afrique et le monde.
-              </p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {['🌍 Afrique','🌎 Amériques','🇪🇺 Europe'].map((c, i) => (
-                  <span key={i} style={{ fontSize: 11, color: '#666', background: 'rgba(255,255,255,.06)', padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,.08)' }}>{c}</span>
-                ))}
-              </div>
-            </div>
-
-            {/* Nav col */}
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 18 }}>Navigation</div>
-              {[['/', 'Accueil'], ['/#products', 'Produits'], ['/contact', 'Contact']].map(([href, label], i) => (
-                <a key={i} href={href} style={{ display: 'block', fontSize: 13, color: '#888', marginBottom: 11, transition: 'color .18s' }}
-                  onMouseEnter={e => e.target.style.color = '#C8931A'}
-                  onMouseLeave={e => e.target.style.color = '#888'}
-                >{label}</a>
-              ))}
-            </div>
-
-            {/* Products col */}
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 18 }}>Produits</div>
-              {[['https://payment-gateway-iota-bay.vercel.app', 'Passerelle de Paiement'], ['https://facture-app-sigma.vercel.app', 'Facture App']].map(([href, label], i) => (
-                <a key={i} href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'block', fontSize: 13, color: '#888', marginBottom: 11, transition: 'color .18s' }}
-                  onMouseEnter={e => e.target.style.color = '#C8931A'}
-                  onMouseLeave={e => e.target.style.color = '#888'}
-                >{label}</a>
-              ))}
-            </div>
-
-            {/* Contact col */}
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 18 }}>Contact</div>
-              {[['✉', 'contact@lfd.com'], ['📞', '+229 97 00 00 00'], ['📍', 'Cotonou, Bénin']].map(([icon, val], i) => (
-                <div key={i} style={{ fontSize: 13, color: '#888', marginBottom: 11, display: 'flex', gap: 8 }}>
-                  <span>{icon}</span> {val}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ borderTop: '1px solid rgba(255,255,255,.07)', paddingTop: 24, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-            <span style={{ fontSize: 12, color: '#444' }}>© {new Date().getFullYear()} La Faveur Infinie de Dieu. Tous droits réservés.</span>
-            <span style={{ fontSize: 12, color: '#444' }}>Développé avec ❤️ depuis le Bénin 🇧🇯</span>
-          </div>
-        </div>
-      </footer>
 
       {showTop && (
         <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Retour en haut"
