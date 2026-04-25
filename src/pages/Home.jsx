@@ -283,7 +283,7 @@ export default function Home() {
 
       {/* ══ STATS ══ */}
       <div style={{ background: '#fff', borderBottom: '1px solid #EBEBEB' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))' }}>
           {[
             { icon: Globe,      val: '40+',   lbl: 'Pays couverts' },
             { icon: CreditCard, val: '2',      lbl: 'Produits live' },
@@ -384,8 +384,6 @@ export default function Home() {
           </Link>
         </div>
       </section>
-
-
 
       {showTop && (
         <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Retour en haut"
