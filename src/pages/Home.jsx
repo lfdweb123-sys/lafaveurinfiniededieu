@@ -264,7 +264,7 @@ export default function Home() {
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 28px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
             <LFDLogo size={34} />
-            <span style={{ fontWeight: 800, fontSize: 15, color: '#111', whiteSpace: 'nowrap' }}>La Faveur Infinie de Dieu</span>
+            <span style={{ fontWeight: 800, fontSize: 15, color: '#111', whiteSpace: 'nowrap' }}>LFD WEB</span>
           </Link>
           <div className="nav-desktop" style={{ alignItems: 'center', gap: 34 }}>
             {NAV_LINKS.map(([href, label]) => (
