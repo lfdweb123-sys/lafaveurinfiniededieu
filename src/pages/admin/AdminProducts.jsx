@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
-import { Plus, Trash2, Edit3, CheckCircle, XCircle, Save, Loader, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, Edit3, CheckCircle, XCircle, Save, Loader, ExternalLink, GripVertical } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const EMOJI_LIST = [
@@ -83,20 +83,95 @@ export default function AdminProducts() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving]     = useState(false);
+  const [draggedItem, setDraggedItem] = useState(null);
+  const [dragOverId, setDragOverId] = useState(null);
   const [form, setForm] = useState({
-    name: '', description: '', emoji: '📦', link: '', category: '', active: true
+    name: '', description: '', emoji: '📦', link: '', category: '', active: true, order: 0
   });
 
   useEffect(() => { loadProducts(); }, []);
 
   const loadProducts = async () => {
     const snap = await getDocs(collection(db, 'products'));
-    setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    let productsList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // Trier par ordre (les produits sans order vont à la fin)
+    productsList.sort((a, b) => {
+      const orderA = a.order !== undefined ? a.order : 9999;
+      const orderB = b.order !== undefined ? b.order : 9999;
+      return orderA - orderB;
+    });
+    setProducts(productsList);
     setLoading(false);
   };
 
+  const updateOrder = async (updatedProducts) => {
+    // Mettre à jour l'ordre de chaque produit dans Firebase
+    const updatePromises = updatedProducts.map((product, index) => {
+      if (product.order !== index) {
+        return updateDoc(doc(db, 'products', product.id), { order: index });
+      }
+      return Promise.resolve();
+    });
+    await Promise.all(updatePromises);
+    setProducts(updatedProducts.map((p, i) => ({ ...p, order: i })));
+    toast.success('Ordre mis à jour');
+  };
+
+  const handleDragStart = (e, index) => {
+    setDraggedItem(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', index);
+    // Pour améliorer l'expérience
+    e.currentTarget.style.opacity = '0.5';
+  };
+
+  const handleDragEnd = (e) => {
+    e.currentTarget.style.opacity = '1';
+    setDraggedItem(null);
+    setDragOverId(null);
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    if (draggedItem === null) return;
+    if (dragOverId !== index) {
+      setDragOverId(index);
+    }
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDragLeave = (e) => {
+    e.currentTarget.style.opacity = '1';
+  };
+
+  const handleDrop = async (e, dropIndex) => {
+    e.preventDefault();
+    if (draggedItem === null) return;
+    
+    const dragIndex = draggedItem;
+    
+    if (dragIndex === dropIndex) {
+      setDraggedItem(null);
+      setDragOverId(null);
+      return;
+    }
+    
+    const reorderedProducts = [...products];
+    const [removed] = reorderedProducts.splice(dragIndex, 1);
+    reorderedProducts.splice(dropIndex, 0, removed);
+    
+    // Mettre à jour l'affichage immédiatement
+    setProducts(reorderedProducts);
+    
+    // Sauvegarder l'ordre dans Firebase
+    await updateOrder(reorderedProducts);
+    
+    setDraggedItem(null);
+    setDragOverId(null);
+  };
+
   const resetForm = () => {
-    setForm({ name: '', description: '', emoji: '📦', link: '', category: '', active: true });
+    setForm({ name: '', description: '', emoji: '📦', link: '', category: '', active: true, order: products.length });
     setEditingId(null);
     setShowForm(false);
   };
@@ -109,6 +184,7 @@ export default function AdminProducts() {
       link:        product.link        || '',
       category:    product.category    || '',
       active:      product.active !== false,
+      order:       product.order !== undefined ? product.order : products.length,
     });
     setEditingId(product.id);
     setShowForm(true);
@@ -119,11 +195,21 @@ export default function AdminProducts() {
     if (!form.name || !form.description) { toast.error('Nom et description requis'); return; }
     setSaving(true);
     try {
+      const productData = { 
+        ...form, 
+        updatedAt: new Date().toISOString(),
+        order: editingId ? form.order : products.length 
+      };
+      
       if (editingId) {
-        await updateDoc(doc(db, 'products', editingId), { ...form, updatedAt: new Date().toISOString() });
+        await updateDoc(doc(db, 'products', editingId), productData);
         toast.success('Produit mis à jour');
       } else {
-        await addDoc(collection(db, 'products'), { ...form, createdAt: new Date().toISOString() });
+        await addDoc(collection(db, 'products'), { 
+          ...productData, 
+          createdAt: new Date().toISOString(),
+          order: products.length 
+        });
         toast.success('Produit ajouté');
       }
       resetForm();
@@ -133,15 +219,25 @@ export default function AdminProducts() {
   };
 
   const handleToggle = async (id, active) => {
-    await updateDoc(doc(db, 'products', id), { active: !active });
-    loadProducts();
+    try {
+      await updateDoc(doc(db, 'products', id), { active: !active });
+      loadProducts();
+      toast.success('Statut mis à jour');
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour');
+    }
   };
 
   const handleDelete = async (id) => {
     if (!confirm('Supprimer ce produit ?')) return;
-    await deleteDoc(doc(db, 'products', id));
-    loadProducts();
-    toast.success('Produit supprimé');
+    try {
+      await deleteDoc(doc(db, 'products', id));
+      // Recharger et réordonner
+      await loadProducts();
+      toast.success('Produit supprimé');
+    } catch (error) {
+      toast.error('Erreur lors de la suppression');
+    }
   };
 
   const inputClass = "w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-yellow-400 outline-none";
@@ -159,6 +255,7 @@ export default function AdminProducts() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Produits</h1>
           <p className="text-sm text-gray-500">{products.length} produit{products.length > 1 ? 's' : ''}</p>
+          <p className="text-xs text-gray-400 mt-1">💡 Glissez-déposez pour réorganiser les produits</p>
         </div>
         <button onClick={() => { resetForm(); setShowForm(true); }}
           className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:shadow-lg flex items-center gap-1.5">
@@ -166,15 +263,34 @@ export default function AdminProducts() {
         </button>
       </div>
 
-      {/* Liste */}
+      {/* Liste avec drag & drop */}
       <div className="space-y-2">
-        {products.map(p => (
-          <div key={p.id} className="bg-white rounded-xl border border-gray-100 p-4 flex items-center justify-between hover:border-gray-200 transition-all">
-            <div className="flex items-center gap-3">
+        {products.map((p, index) => (
+          <div 
+            key={p.id} 
+            draggable
+            onDragStart={(e) => handleDragStart(e, index)}
+            onDragEnd={handleDragEnd}
+            onDragOver={(e) => handleDragOver(e, index)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, index)}
+            className={`bg-white rounded-xl border p-4 flex items-center justify-between hover:border-gray-200 transition-all cursor-move ${
+              dragOverId === index ? 'border-2 border-yellow-400 bg-yellow-50' : 'border-gray-100'
+            }`}
+            style={{
+              transition: 'all 0.2s ease',
+              opacity: draggedItem === index ? 0.3 : 1
+            }}
+          >
+            <div className="flex items-center gap-3 flex-1">
+              <div className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600">
+                <GripVertical size={20} />
+              </div>
               <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-xl">{p.emoji || '📦'}</div>
-              <div>
+              <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-semibold text-gray-900">{p.name}</p>
+                  <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">#{index + 1}</span>
                   {p.active === false && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">Inactif</span>}
                 </div>
                 <p className="text-xs text-gray-500 truncate max-w-md">{p.description}</p>
@@ -228,6 +344,22 @@ export default function AdminProducts() {
                 <label className={labelClass}>Catégorie</label>
                 <input type="text" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className={inputClass} placeholder="Paiement, Facturation..." />
               </div>
+
+              {editingId && (
+                <div>
+                  <label className={labelClass}>Position</label>
+                  <input 
+                    type="number" 
+                    value={form.order} 
+                    onChange={e => setForm({ ...form, order: parseInt(e.target.value) || 0 })} 
+                    className={inputClass} 
+                    placeholder="Ordre d'affichage"
+                    min="0"
+                    max={products.length}
+                  />
+                  <p className="text-xs text-gray-400 mt-1">0 = premier, {products.length} = dernier</p>
+                </div>
+              )}
 
               <button type="submit" disabled={saving}
                 className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-semibold py-3 rounded-xl hover:shadow-lg disabled:opacity-50 flex items-center justify-center gap-2">
