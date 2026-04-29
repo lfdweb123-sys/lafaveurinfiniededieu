@@ -55,8 +55,8 @@ export default function Contact() {
 
         <div className="grid sm:grid-cols-3 gap-4">
           {[
-            { icon: Mail, title: 'Email', value: 'contact@lfd.com' },
-            { icon: Phone, title: 'Téléphone', value: '+229 97 00 00 00' },
+            { icon: Mail, title: 'Email', value: 'contact@lfdweb.com' },
+            { icon: Phone, title: 'Téléphone', value: '+229 01 43 26 05 96' },
             { icon: MapPin, title: 'Adresse', value: 'Cotonou, Bénin' }
           ].map((c, i) => (
             <div key={i} className="bg-white rounded-2xl border p-6 text-center">

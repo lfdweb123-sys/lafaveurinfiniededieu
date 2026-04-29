@@ -181,7 +181,7 @@ const SERVICES = [
 ];
 
 const TECH = ['React','Vue.js','Node.js','Firebase','Vercel','TailwindCSS','Python','Flutter','MongoDB','PostgreSQL','AWS','Stripe'];
-const NAV_LINKS = [['/#products','Produits'],['/#services','Services'],['/#about','À propos'],['/contact','Contact']];
+const NAV_LINKS = [['/#products','Produits'],['/#services','Services'],['/contact','Contact']];
 
 /* ─── Component ─────────────────────────────────────────── */
 export default function Home() {
