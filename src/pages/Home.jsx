@@ -57,7 +57,15 @@ const ACCENT_COLORS = ['#C8931A','#2563EB','#16A34A','#7C3AED','#DC2626','#0891B
 
 function HeroMock({ dbProducts }) {
   /* Uniquement Firebase + "Prochain Produit" toujours en dernier */
-  const activeDb = dbProducts.filter(p => p.active !== false);
+  // Trier les produits par ordre avant de les afficher
+  const activeDb = dbProducts
+    .filter(p => p.active !== false)
+    .sort((a, b) => {
+      const orderA = a.order !== undefined ? a.order : 9999;
+      const orderB = b.order !== undefined ? b.order : 9999;
+      return orderA - orderB;
+    });
+  
   const allRows = [
     ...activeDb,
     { name: 'Prochain Produit', emoji: '✨', tag: 'Bientôt', coming: true },
@@ -92,7 +100,7 @@ function HeroMock({ dbProducts }) {
         const badge  = p.coming ? 'Bientôt' : (p.tag || 'En ligne');
         const icon   = p.emoji || (p.coming ? '✨' : '📦');
         return (
-          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < allRows.length - 1 ? '1px solid #F5F5F5' : 'none' }}>
+          <div key={p.id || i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < allRows.length - 1 ? '1px solid #F5F5F5' : 'none' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ width: 26, height: 26, borderRadius: 7, background: `${accent}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>{icon}</div>
               <span style={{ fontSize: 12, color: '#444', fontWeight: 600, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
@@ -189,11 +197,20 @@ export default function Home() {
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
-  /* Produits Firebase en temps réel */
+  /* Produits Firebase en temps réel avec tri par ordre */
   useEffect(() => {
     const unsub = onSnapshot(
       collection(db, 'products'),
-      snap => setDbProducts(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+      snap => {
+        const productsList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        // Trier par ordre (les produits sans order vont à la fin)
+        productsList.sort((a, b) => {
+          const orderA = a.order !== undefined ? a.order : 9999;
+          const orderB = b.order !== undefined ? b.order : 9999;
+          return orderA - orderB;
+        });
+        setDbProducts(productsList);
+      },
       console.error
     );
     return () => unsub();
@@ -360,10 +377,9 @@ export default function Home() {
           </div>
 
           {(() => {
-            /* Toute la liste ordonnée : Firebase actifs + "Prochain" en dernier */
-            const dbCards = dbProducts
-              .filter(p => p.active !== false)
-              .map(p => ({ key: p.id, type: 'db', data: p }));
+            /* Toute la liste ordonnée : Firebase actifs (déjà triés) + "Prochain" en dernier */
+            const activeProducts = dbProducts.filter(p => p.active !== false);
+            const dbCards = activeProducts.map(p => ({ key: p.id, type: 'db', data: p }));
             const comingCard = { key: 'coming', type: 'coming', data: COMING_PRODUCT };
             const allCards = [...dbCards, comingCard];
             const visible  = allCards.slice(0, visibleCount);
