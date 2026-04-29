@@ -18,7 +18,7 @@ export default function Header() {
           <div className="w-8 h-8 bg-gradient-to-br from-gold-500 to-gold-600 rounded-xl flex items-center justify-center">
             <Sparkles size={16} className="text-white" />
           </div>
-          <span className="font-extrabold text-gray-900 hidden sm:block">La Faveur Infinie de Dieu</span>
+          <span className="font-extrabold text-gray-900 hidden sm:block">LFD WEB</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-8">

@@ -11,7 +11,7 @@ export default function Footer() {
               <div className="w-8 h-8 bg-gradient-to-br from-gold-500 to-gold-600 rounded-xl flex items-center justify-center">
                 <Sparkles size={14} className="text-white" />
               </div>
-              <span className="text-white font-bold">LFD</span>
+              <span className="text-white font-bold">LFD WEB</span>
             </div>
             <p className="text-sm leading-relaxed mb-4">Solutions numériques innovantes pour l'Afrique et le monde.</p>
           </div>
@@ -33,8 +33,8 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-semibold text-sm mb-4">Contact</h4>
             <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2"><Mail size={14} /> contact@lfd.com</div>
-              <div className="flex items-center gap-2"><Phone size={14} /> +229 97 00 00 00</div>
+              <div className="flex items-center gap-2"><Mail size={14} /> contact@lfdweb.com</div>
+              <div className="flex items-center gap-2"><Phone size={14} /> +229 01 43 26 05 96</div>
               <div className="flex items-center gap-2"><MapPin size={14} /> Cotonou, Bénin</div>
             </div>
           </div>
