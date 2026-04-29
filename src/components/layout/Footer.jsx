@@ -26,8 +26,8 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-semibold text-sm mb-4">Produits</h4>
             <div className="space-y-2 text-sm">
-              <a href="https://payment-gateway-iota-bay.vercel.app" target="_blank" rel="noopener noreferrer" className="block hover:text-white">Passerelle de Paiement</a>
-              <a href="https://facture-app-sigma.vercel.app" target="_blank" rel="noopener noreferrer" className="block hover:text-white">Facture App</a>
+              <a href="https://paymentgateway.lfdweb.com/" target="_blank" rel="noopener noreferrer" className="block hover:text-white">Passerelle de Paiement</a>
+              <a href="https://factureapp.lfdweb.com/" target="_blank" rel="noopener noreferrer" className="block hover:text-white">Facture App</a>
             </div>
           </div>
           <div>
@@ -39,7 +39,20 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        
+        {/* Liens légaux */}
+        <div className="border-t border-gray-800 pt-6 pb-4">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+            <Link to="/privacy" className="hover:text-white transition-colors">
+              Politique de confidentialité
+            </Link>
+            <Link to="/terms" className="hover:text-white transition-colors">
+              Conditions générales d'utilisation
+            </Link>
+          </div>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm">© {new Date().getFullYear()} La Faveur Infinie de Dieu. Tous droits réservés.</p>
           <p className="text-sm">Développé avec ❤️ depuis le Bénin</p>
         </div>

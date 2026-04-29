@@ -55,16 +55,15 @@ function LFDLogo({ size = 34 }) {
 /* Couleurs accent selon index */
 const ACCENT_COLORS = ['#C8931A','#2563EB','#16A34A','#7C3AED','#DC2626','#0891B2'];
 
-function HeroMock({ staticProducts, dbProducts }) {
-  /* Fusion : statiques en dur + Firebase, "Prochain Produit" toujours en dernier */
+function HeroMock({ dbProducts }) {
+  /* Uniquement Firebase + "Prochain Produit" toujours en dernier */
   const activeDb = dbProducts.filter(p => p.active !== false);
   const allRows = [
-    ...staticProducts,
     ...activeDb,
     { name: 'Prochain Produit', emoji: '✨', tag: 'Bientôt', coming: true },
   ].slice(0, 5); /* max 5 lignes pour ne pas déborder */
 
-  const liveCount = staticProducts.length + activeDb.length;
+  const liveCount = activeDb.length;
 
   return (
     <div style={{
@@ -123,12 +122,7 @@ function FloatingBadge({ style, children }) {
   );
 }
 
-/* ─── Produits en dur ─────────────────────────────────── */
-const STATIC_PRODUCTS = [
-  { name: 'Passerelle de Paiement', desc: '15 providers, 40+ pays, Mobile Money, cartes, PayPal. API REST complète.',             icon: Globe,    link: 'https://payment-gateway-iota-bay.vercel.app', accent: '#C8931A', tag: 'En ligne' },
-  { name: 'Facture App',            desc: 'Factures, contrats, paiements en ligne. Assistant IA intégré pour freelances et PME.', icon: Shield,   link: 'https://facture-app-sigma.vercel.app',           accent: '#2563EB', tag: 'En ligne' },
-];
-
+/* ─── Produits venant UNIQUEMENT de Firebase ─────────────────────────────────── */
 const COMING_PRODUCT = { name: 'Prochain Produit', desc: 'Une nouvelle solution innovante en cours de développement. Restez connecté.', icon: Sparkles, link: '#', accent: '#7C3AED', tag: 'Bientôt', coming: true };
 
 /* ─── Carte pour un produit Firebase ─────────────────── */
@@ -317,7 +311,7 @@ export default function Home() {
           <div className="hero-visual" style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', height: 460 }}>
             <FloatingBadge style={{ top: 22, right: 0 }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#16A34A', display: 'inline-block' }} />
-              {STATIC_PRODUCTS.length + dbProducts.filter(p => p.active !== false).length} produit{STATIC_PRODUCTS.length + dbProducts.filter(p => p.active !== false).length > 1 ? 's' : ''} en ligne 🚀
+              {dbProducts.filter(p => p.active !== false).length} produit{dbProducts.filter(p => p.active !== false).length > 1 ? 's' : ''} en ligne 🚀
             </FloatingBadge>
             <FloatingBadge style={{ top: 185, left: -24 }}>
               <Globe size={13} style={{ color: '#C8931A' }} /> 40+ pays supportés 🌍
@@ -325,7 +319,7 @@ export default function Home() {
             <FloatingBadge style={{ bottom: 55, right: -8 }}>
               <Zap size={13} style={{ color: '#7C3AED' }} /> Innovation continue ✨
             </FloatingBadge>
-            <div className="lfd-float"><HeroMock staticProducts={STATIC_PRODUCTS} dbProducts={dbProducts} /></div>
+            <div className="lfd-float"><HeroMock dbProducts={dbProducts} /></div>
           </div>
         </div>
       </section>
@@ -335,7 +329,7 @@ export default function Home() {
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))' }}>
           {[
             { icon: Globe,      val: '40+',  lbl: 'Pays couverts' },
-            { icon: CreditCard, val: STATIC_PRODUCTS.length + dbProducts.filter(p => p.active !== false).length, lbl: 'Produits live' },
+            { icon: CreditCard, val: dbProducts.filter(p => p.active !== false).length, lbl: 'Produits live' },
             { icon: TrendingUp, val: '99.9%',lbl: 'Disponibilité' },
             { icon: Zap,        val: '24/7', lbl: 'Support actif' },
           ].map((s, i, arr) => (
@@ -366,15 +360,12 @@ export default function Home() {
           </div>
 
           {(() => {
-            /* Toute la liste ordonnée : statiques + Firebase actifs + "Prochain" en dernier */
-            const staticCards = STATIC_PRODUCTS.map((p, i) => ({
-              key: `static-${i}`, type: 'static', data: p
-            }));
+            /* Toute la liste ordonnée : Firebase actifs + "Prochain" en dernier */
             const dbCards = dbProducts
               .filter(p => p.active !== false)
               .map(p => ({ key: p.id, type: 'db', data: p }));
             const comingCard = { key: 'coming', type: 'coming', data: COMING_PRODUCT };
-            const allCards = [...staticCards, ...dbCards, comingCard];
+            const allCards = [...dbCards, comingCard];
             const visible  = allCards.slice(0, visibleCount);
             const hasMore  = allCards.length > visibleCount;
 
@@ -382,23 +373,6 @@ export default function Home() {
               <>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(290px,1fr))', gap: 22 }}>
                   {visible.map(({ key, type, data: p }) => {
-                    if (type === 'static') return (
-                      <a key={key}
-                        href={p.link} target={p.link !== '#' ? '_blank' : '_self'} rel="noopener noreferrer"
-                        className="prod-card"
-                        style={{ padding: '36px 30px', position: 'relative' }}
-                      >
-                        <span style={{ position: 'absolute', top: 18, right: 18, fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 100, background: '#ECFDF5', color: '#15803D' }}>{p.tag}</span>
-                        <div style={{ width: 52, height: 52, borderRadius: 16, background: `${p.accent}1A`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
-                          <p.icon size={26} style={{ color: p.accent }} />
-                        </div>
-                        <h3 style={{ fontSize: 18, fontWeight: 800, color: '#111', marginBottom: 10 }}>{p.name}</h3>
-                        <p style={{ fontSize: 14, color: '#777', lineHeight: 1.7, marginBottom: 22 }}>{p.desc}</p>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: p.accent }}>
-                          Visiter le site <ExternalLink size={13} />
-                        </span>
-                      </a>
-                    );
                     if (type === 'db') return <FirebaseProductCard key={key} p={p} />;
                     /* coming */
                     return (
